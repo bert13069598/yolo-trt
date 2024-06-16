@@ -1,21 +1,10 @@
-import argparse
-import threading
-from glob import glob
-
 import cv2
 import numpy as np
 import torch
 
-from base import TRT
+from predict.base import TRT
 from utils.color import colormap
 from utils.labels import dota_label_to_object, car_label_to_object
-
-parser = argparse.ArgumentParser(description='YOLOv8-OBB')
-parser.add_argument('-m', '--model', type=str, help='model name for .pt', default='yolov8n-obb')
-parser.add_argument('-n', '--nc', type=int, help='number of class', default=15)
-parser.add_argument('-b', '--batch', type=int, help='batch number', default=1)
-parser.add_argument('-q', '--quantization', type=str, help='when export, fp32 fp16 int8', default='fp32')
-args = parser.parse_args()
 
 
 def xywhr2xyxyxyxy(center):
@@ -75,9 +64,11 @@ def NMS(boxes, scores, iou_thres):
     return sorted_idx[pick]
 
 
-class OBB_TRT(TRT):
-    def __init__(self, trt_engine, nc):
-        super().__init__(trt_engine, args.batch, args.quantization, (3840, 2160), (1024, 1024))
+class YOLOv8_OBB_TRT(TRT):
+    def __init__(self, model, batch, quantization, nc):
+        self.model = model
+        trt_engine = "models/{}-b{}-{}.engine".format(model, batch, quantization)
+        super().__init__(trt_engine, batch, quantization, (3840, 2160), (1024, 1024))
 
         self.input_buffer = torch.empty((self.batch, 3, self.dst_shape[1], self.dst_shape[0]),
                                         dtype=self.dtype,
@@ -130,32 +121,11 @@ class OBB_TRT(TRT):
                     label = classes[i]
                     r, g, b = map(int, colormap[label])
                     cv2.polylines(img, [np.asarray(box, dtype=int)], True, (r, g, b), 2)
-                    if args.model == 'yolov8n-obb':
+                    if self.model == 'yolov8n-obb':
                         caption = f"{dota_label_to_object[label]} {confidence:.2f}"
-                    elif args.model == 'yolov8n-obb-car':
+                    elif self.model == 'yolov8n-obb-car':
                         caption = f"{car_label_to_object[label]} {confidence:.2f}"
                     w, h = cv2.getTextSize(caption, 0, 1, 2)[0]
                     left, top = [int(b) for b in box[0]]
                     cv2.putText(img, caption, (left, top - 5), 0, 1, (r, g, b), 2, 16)
         return imgs
-
-
-if __name__ == "__main__":
-    path = "/home/deepet/Downloads/datasets/자율주행드론 비행 영상/Training/image"
-    paths1 = sorted(glob(path + "/202007171220_60m_45도_2_image/*.jpg"))
-    paths2 = sorted(glob(path + "/202007171454_60m_45도_2_image/*.jpg"))
-    paths3 = sorted(glob(path + "/202007171527_80m_45도_2_image/*.jpg"))
-    paths4 = sorted(glob(path + "/202007201035_60m_45도_2_image/*.jpg"))
-    pathl = [paths1, paths2, paths3, paths4]
-    pathl += pathl
-
-    obb_trt = OBB_TRT("models/{}-b{}-{}.engine".format(args.model, args.batch, args.quantization), args.nc)
-
-    th_load_images = threading.Thread(target=obb_trt.load_images, args=(pathl[:args.batch]))
-    th_infer_images = threading.Thread(target=obb_trt.run)
-
-    th_load_images.start()
-    th_infer_images.start()
-
-    th_load_images.join()
-    th_infer_images.join()
