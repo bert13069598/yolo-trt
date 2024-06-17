@@ -1,7 +1,7 @@
 import cv2
 import torch
 
-from predict.base import TRT
+from detect.base import TRT
 from utils.color import colormap
 from utils.labels import car_label_to_object, yolo_labels
 

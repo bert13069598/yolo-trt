@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import torch
 
-from predict.base import TRT
+from detect.base import TRT
 from utils.color import colormap
 from utils.labels import dota_label_to_object, car_label_to_object
 

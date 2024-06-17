@@ -2,10 +2,9 @@ import argparse
 import threading
 from glob import glob
 
-from predict.v8_obb import YOLOv8_OBB_TRT
-from predict.v9 import YOLOv9_TRT
-from predict.v10 import YOLOv10_TRT
-
+from detect.v8_obb import YOLOv8_OBB_TRT
+from detect.v9 import YOLOv9_TRT
+from detect.v10 import YOLOv10_TRT
 
 parser = argparse.ArgumentParser(description='YOLO TRT')
 parser.add_argument('-m', '--model', type=str, help='model name for .pt', default='yolov9c')

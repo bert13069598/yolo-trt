@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torchvision
 
-from predict.base import TRT
+from detect.base import TRT
 from utils.color import colormap
 from utils.labels import yolo_labels
 
