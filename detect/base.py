@@ -84,7 +84,9 @@ class TRT:
             for i in range(self.batch):
                 cv2.imshow(f"Drone {i + 1}",
                            cv2.resize(post_batch[i], (self.src_shape[0] // 4, self.src_shape[1] // 4)))
-            cv2.waitKey(1)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        cv2.destroyAllWindows()
 
     def load_images(self, *pathsl):
         imgs = [None] * self.batch
