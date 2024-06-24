@@ -121,9 +121,9 @@ class YOLOv8_OBB_TRT(TRT):
                     label = classes[i]
                     r, g, b = map(int, colormap[label])
                     cv2.polylines(img, [np.asarray(box, dtype=int)], True, (r, g, b), 2)
-                    if self.model == 'yolov8n-obb':
+                    if any(self.model == f'yolov8{x}-obb' for x in ['n', 's', 'm', 'l', 'x']):
                         caption = f"{dota_label_to_object[label]} {confidence:.2f}"
-                    elif self.model == 'yolov8n-obb-car':
+                    elif any(self.model == f'yolov8{x}-obb-car' for x in ['n', 's', 'm', 'l', 'x']):
                         caption = f"{car_label_to_object[label]} {confidence:.2f}"
                     w, h = cv2.getTextSize(caption, 0, 1, 2)[0]
                     left, top = [int(b) for b in box[0]]

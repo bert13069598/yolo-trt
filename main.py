@@ -22,19 +22,19 @@ if __name__ == "__main__":
     pathl = [paths1, paths2, paths3, paths4]
     pathl += pathl
 
-    if args.model == 'yolov8n-obb-car':
+    if any(args.model == f'yolov8{x}-obb-car' for x in ['n', 's', 'm', 'l', 'x']):
         yolo_trt = YOLOv8_OBB_TRT(model=args.model,
                                   batch=args.batch,
                                   quantization=args.quantization,
                                   nc=args.nc)
-    elif args.model == 'yolov9c':
+    elif any(args.model == f'yolov9{x}' for x in ['t', 's', 'm', 'c', 'e']):
         yolo_trt = YOLOv9_TRT(model=args.model,
                               batch=args.batch,
                               quantization=args.quantization)
-    elif args.model == 'yolov10n-car':
+    elif any(args.model == f'yolov10{x}-car' for x in ['n', 's', 'm', 'b', 'l', 'x']):
         yolo_trt = YOLOv10_TRT(model=args.model,
-                              batch=args.batch,
-                              quantization=args.quantization)
+                               batch=args.batch,
+                               quantization=args.quantization)
 
     th_load_images = threading.Thread(target=yolo_trt.load_images, args=(pathl[:args.batch]))
     th_infer_images = threading.Thread(target=yolo_trt.run)
